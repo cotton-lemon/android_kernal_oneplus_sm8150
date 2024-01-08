@@ -9,6 +9,8 @@ export SPL="2021-01"
 echo "kerneldir = $KERNELDIR"
 echo "ramfs_source = $RAMFS_SOURCE"
 
+cp .config defconfig
+
 RAMFS_TMP="/tmp/arter97-op7-ramdisk"
 
 echo "ramfs_tmp = $RAMFS_TMP"
