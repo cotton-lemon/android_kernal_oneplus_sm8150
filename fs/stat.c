@@ -30,6 +30,12 @@
  * found on the VFS inode structure.  This is the default if no getattr inode
  * operation is supplied.
  */
+
+
+#ifdef CONFIG_KSU
+extern int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags);
+#endif
+
 void generic_fillattr(struct inode *inode, struct kstat *stat)
 {
 	stat->dev = inode->i_sb->s_dev;
@@ -134,6 +140,7 @@ int vfs_statx_fd(unsigned int fd, struct kstat *stat,
 {
 	struct fd f;
 	int error = -EBADF;
+	
 
 	if (query_flags & ~KSTAT_QUERY_FLAGS)
 		return -EINVAL;
@@ -169,7 +176,12 @@ int vfs_statx(int dfd, const char __user *filename, int flags,
 	struct path path;
 	int error = -EINVAL;
 	unsigned int lookup_flags = LOOKUP_FOLLOW | LOOKUP_AUTOMOUNT;
+	
+	#ifdef CONFIG_KSU
+	ksu_handle_stat(&dfd, &filename, &flags);
+    #endif
 
+	
 	if ((flags & ~(AT_SYMLINK_NOFOLLOW | AT_NO_AUTOMOUNT |
 		       AT_EMPTY_PATH | KSTAT_QUERY_FLAGS)) != 0)
 		return -EINVAL;
