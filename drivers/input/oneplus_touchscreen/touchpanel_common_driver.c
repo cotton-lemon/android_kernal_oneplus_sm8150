@@ -216,7 +216,7 @@ static void tp_touch_down(struct touchpanel_data *ts, struct point_info points,
 			  int touch_report_num, int id)
 {
 	static int last_width_major;
-
+	pr_info("OSG tp_touch_down\n");
 	if (ts->input_dev == NULL)
 		return;
 
@@ -229,10 +229,12 @@ static void tp_touch_down(struct touchpanel_data *ts, struct point_info points,
 #endif
 	{
 		input_report_abs(ts->input_dev, ABS_MT_TOUCH_MAJOR, points.z);
+		pr_info("OSG tp_touch_down 1\n");
 	} else {
 		if (touch_report_num == 1) {
 			input_report_abs(ts->input_dev, ABS_MT_WIDTH_MAJOR,
 					 points.width_major);
+			pr_info("OSG tp_touch_down 2 \n");
 			last_width_major = points.width_major;
 		} else if (!(touch_report_num & 0x7f) || touch_report_num == 30) {	//avoid same point info getevent cannot report
 			//if touch_report_num == 127, every 127 points, change width_major
@@ -243,6 +245,7 @@ static void tp_touch_down(struct touchpanel_data *ts, struct point_info points,
 			} else {
 				last_width_major = points.width_major;
 			}
+			pr_info("OSG tp_touch_down 3\n");
 			input_report_abs(ts->input_dev, ABS_MT_WIDTH_MAJOR,
 					 last_width_major);
 		}
@@ -252,7 +255,7 @@ static void tp_touch_down(struct touchpanel_data *ts, struct point_info points,
 				   id, points.x, points.y, points.z);
 		}
 	}
-
+	pr_info("OSG tp_touch_down %d %d  \n",points.x,points.y);
 	input_report_abs(ts->input_dev, ABS_MT_POSITION_X, points.x);
 	input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, points.y);
 
@@ -268,7 +271,7 @@ static void tp_touch_up(struct touchpanel_data *ts)
 {
 	if (ts->input_dev == NULL)
 		return;
-
+	pr_info("OSG tp_touch_up\n");
 	input_report_key(ts->input_dev, BTN_TOUCH, 0);
 	input_report_key(ts->input_dev, BTN_TOOL_FINGER, 0);
 #ifndef TYPE_B_PROTOCOL
@@ -492,6 +495,7 @@ static void tp_gesture_handle(struct touchpanel_data *ts)
 	}
 
 	if (enabled) {
+		pr_info("OSG tp_gesture\n");
 		memcpy(&ts->gesture, &gesture_info_temp, sizeof(struct gesture_info));
 		input_report_key(ts->input_dev, key, 1);
 		input_sync(ts->input_dev);
@@ -522,6 +526,7 @@ static void tp_touch_release(struct touchpanel_data *ts)
 		input_mt_slot(ts->input_dev, i);
 		input_mt_report_slot_state(ts->input_dev, MT_TOOL_FINGER, 0);
 	}
+	pr_info("OSG tp_touch_release\n");
 	input_report_key(ts->input_dev, BTN_TOUCH, 0);
 	input_report_key(ts->input_dev, BTN_TOOL_FINGER, 0);
 	input_sync(ts->input_dev);
@@ -568,6 +573,7 @@ static void tp_touch_handle(struct touchpanel_data *ts)
 							   MT_TOOL_FINGER, 0);
 			}
 #endif
+			pr_info("OSG tp_touch_handle\n");
 			input_report_key(ts->input_dev, BTN_TOUCH, 0);
 			input_report_key(ts->input_dev, BTN_TOOL_FINGER, 0);
 #ifndef TYPE_B_PROTOCOL
@@ -3617,6 +3623,7 @@ int common_touch_data_free(struct touchpanel_data *pdata)
 static void input_report_key_reduce(struct input_dev *dev,
 				unsigned int code, int value)
 {
+	pr_info("OSG tp_touch??\n");
 	if (value) {		//report Key[down]
 		if (g_tp) {
 			if (g_tp->view_area_touched == 0) {
