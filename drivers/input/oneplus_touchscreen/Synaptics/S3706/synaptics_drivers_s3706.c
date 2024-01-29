@@ -73,6 +73,7 @@ static int tp_single_tap_en(struct chip_data_s3706 *ts, bool enable)
 static int synaptics_get_touch_points(void *chip_data,
 				      struct point_info *points, int max_num)
 {
+	pr_info("OSG synaptics get touch point\n");
 	int ret, i, obj_attention;
 	unsigned char fingers_to_process = max_num;
 	struct chip_data_s3706 *chip_info = (struct chip_data_s3706 *)chip_data;
@@ -1015,6 +1016,7 @@ static int synaptics_mode_switch(void *chip_data, work_mode mode, bool flag)
 static int synaptics_get_gesture_info(void *chip_data,
 				      struct gesture_info *gesture)
 {
+	pr_info("OSG synaptics get gesture\n");
 	int ret = 0, i, gesture_sign, regswipe;
 	uint8_t *gesture_buffer = dma_buffer->gesture_buffer;
 	uint8_t *coordinate_buf = dma_buffer->coordinate_buf;

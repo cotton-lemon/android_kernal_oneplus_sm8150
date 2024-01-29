@@ -34,8 +34,8 @@
 #define TPD_PRINT_POINT_NUM 150
 #define TPD_DEVICE "touchpanel"
 // Even TPD_INFO is too spammy
-#define TPD_INFO(a, arg...)		pr_debug("[TP]"TPD_DEVICE ": " a, ##arg)
-#define TPD_DEBUG(a, arg...)		pr_debug("[TP]"TPD_DEVICE ": " a, ##arg)
+#define TPD_INFO(a, arg...)		pr_info("[TP]"TPD_DEVICE ": " a, ##arg)
+#define TPD_DEBUG(a, arg...)		pr_info("[TP]"TPD_DEVICE ": " a, ##arg)
 #define TPD_DEBUG_NTAG(a, arg...)	pr_debug("[TP]"TPD_DEVICE ": " a, ##arg)
 #define TPD_DETAIL(a, arg...)		pr_debug("[TP]"TPD_DEVICE ": " a, ##arg)
 
@@ -57,6 +57,15 @@ static int sigle_num = 0;
 static struct timeval tpstart, tpend;
 static int pointx[2] = { 0, 0 };
 static int pointy[2] = { 0, 0 };
+static int history_x[100]={0};
+static int history_y[100]={0};
+static int xhead=0;
+static int yhead=0;
+static int state=0;
+static int state2=0;
+static int count=0;
+static int prex=0;
+static int prey=0;
 
 #define ABS(a,b) ((a - b > 0) ? a - b : b - a)
 
@@ -256,6 +265,109 @@ static void tp_touch_down(struct touchpanel_data *ts, struct point_info points,
 		}
 	}
 	pr_info("OSG tp_touch_down %d %d  \n",points.x,points.y);
+
+	// if(1100<points.x && 1200<points.y&&points.y<1500){
+	// 	pr_info("OSG tp_touch volumeup\n");
+	// 	input_sync(ts->input_dev);
+	// 	input_report_key(ts->input_dev, KEY_VOLUMEDOWN, 1);
+	// 	input_sync(ts->input_dev);
+	// 	input_report_key(ts->input_dev, KEY_VOLUMEDOWN, 0);
+	// 	input_sync(ts->kpd_input_dev);
+	// 	input_report_key(ts->input_dev, KEY_VOLUMEDOWN, 1);
+	// 	input_sync(ts->input_dev);
+	// 	input_report_key(ts->input_dev, KEY_VOLUMEDOWN, 0);
+	// 	input_sync(ts->kpd_input_dev);
+	// }
+	// if(1100<points.x &&  points.y>2200){
+	// 	pr_info("OSG tp_touch volumeup\n");
+	// 	input_sync(ts->input_dev);
+	// 	input_report_key(ts->input_dev, KEY_VOLUMEUP, 1);
+	// 	input_sync(ts->input_dev);
+	// 	input_report_key(ts->input_dev, KEY_VOLUMEUP, 0);
+	// 	input_sync(ts->kpd_input_dev);
+	// 	// input_report_key(ts->input_dev, KEY_VOLUMEUP, 1);
+	// 	// input_sync(ts->input_dev);
+	// 	// input_report_key(ts->input_dev, KEY_VOLUMEUP, 0);
+	// 	// input_sync(ts->kpd_input_dev);
+	// }
+	// if(1300<points.x && points.x<1400 && 1900<points.y&& points.y<2000){
+	// 	if(state==0){
+	// 		pr_info("OSG tp_touch power\n");
+	// 		input_sync(ts->input_dev);
+	// 		input_report_key(ts->input_dev, KEY_POWER, 1);
+	// 		input_sync(ts->input_dev);
+	// 		input_report_key(ts->input_dev, KEY_POWER, 0);
+	// 		input_sync(ts->kpd_input_dev);
+	// 		state=100;
+	// 	}
+	// 	else{
+	// 		state-=1;
+	// 	}
+	// }
+	// else{
+	// 	state-=10;
+	// 	if (state<=0){
+	// 		state=0;
+	// 	}
+	// }
+	int th=5;
+	if (state2==0){
+		if (points.x>prex){
+			state2=1;
+			count++;
+		}
+	}
+	else if (state2==1)
+	{
+		if (points.x>prex){
+			count++;
+		}
+		else if (points.y>prey&&count>th){
+			count=0;
+			state2=2;
+		}
+	}
+	else if (state2==2){
+		if (points.x>=prex){
+
+		}
+		else if (points.y>prey){
+			count++;
+			if (count>5){
+				if (state>0){
+					state--;
+				}
+				else{
+					pr_info("OSG tp_touch getsutre power\n");
+					input_sync(ts->input_dev);
+					input_report_key(ts->input_dev, KEY_POWER, 1);
+					input_sync(ts->input_dev);
+					input_report_key(ts->input_dev, KEY_POWER, 0);
+					input_sync(ts->kpd_input_dev);
+					state=100;
+				}
+
+			}
+		}
+		else{
+			state2=0;
+		}
+	}
+	
+	
+	
+	history_x[xhead]=points.x;
+	history_y[yhead]=points.y;
+	xhead=(xhead+1)%100;
+	yhead=(yhead+1)%100;
+	prex=points.x;
+	prey=points.y;
+	pr_info("%d %d\n",xhead,yhead);
+	// int ii=0;
+	// for (; ii<100;++ii){
+	// 	pr_info("%d ",history_x[ii]);
+	// }
+	pr_info("\n");
 	input_report_abs(ts->input_dev, ABS_MT_POSITION_X, points.x);
 	input_report_abs(ts->input_dev, ABS_MT_POSITION_Y, points.y);
 
@@ -411,7 +523,26 @@ static void tp_gesture_handle(struct touchpanel_data *ts)
 			}
 		}
 	}
-	TPD_INFO("detect %s gesture\n",
+	// pr_info("OSG detect %s gesture\n",
+	// 	 gesture_info_temp.gesture_type ==
+	// 	 DouTap ? "double tap" : gesture_info_temp.gesture_type ==
+	// 	 UpVee ? "up vee" : gesture_info_temp.gesture_type ==
+	// 	 DownVee ? "down vee" : gesture_info_temp.gesture_type ==
+	// 	 LeftVee ? "(>)" : gesture_info_temp.gesture_type ==
+	// 	 RightVee ? "(<)" : gesture_info_temp.gesture_type ==
+	// 	 Circle ? "o" : gesture_info_temp.gesture_type ==
+	// 	 DouSwip ? "(||)" : gesture_info_temp.gesture_type ==
+	// 	 Left2RightSwip ? "(-->)" : gesture_info_temp.gesture_type ==
+	// 	 Right2LeftSwip ? "(<--)" : gesture_info_temp.gesture_type ==
+	// 	 Up2DownSwip ? "up to down |" : gesture_info_temp.
+	// 	 gesture_type ==
+	// 	 Down2UpSwip ? "down to up |" : gesture_info_temp.
+	// 	 gesture_type ==
+	// 	 Mgestrue ? "(M)" : gesture_info_temp.gesture_type ==
+	// 	 Sgestrue ? "(S)" : gesture_info_temp.gesture_type ==
+	// 	 SingleTap ? "(single tap)" : gesture_info_temp.gesture_type ==
+	// 	 Wgestrue ? "(W)" : "unknown");
+		TPD_INFO("detect %s gesture\n",
 		 gesture_info_temp.gesture_type ==
 		 DouTap ? "double tap" : gesture_info_temp.gesture_type ==
 		 UpVee ? "up vee" : gesture_info_temp.gesture_type ==
@@ -493,9 +624,9 @@ static void tp_gesture_handle(struct touchpanel_data *ts)
 			key = KEY_GESTURE_W;
 			break;
 	}
-
+	pr_info("OSG tp_gesture key %d\n",key);
 	if (enabled) {
-		pr_info("OSG tp_gesture\n");
+		pr_info("OSG tp_gesture enabled key %d\n",key);
 		memcpy(&ts->gesture, &gesture_info_temp, sizeof(struct gesture_info));
 		input_report_key(ts->input_dev, key, 1);
 		input_sync(ts->input_dev);
@@ -2292,7 +2423,9 @@ static int init_input_device(struct touchpanel_data *ts)
 	ts->kpd_input_dev->name = TPD_DEVICE "_kpd";
 	set_bit(EV_KEY, ts->kpd_input_dev->evbit);
 	set_bit(EV_SYN, ts->kpd_input_dev->evbit);
-
+	set_bit(KEY_POWER,ts->input_dev->keybit);
+	set_bit(KEY_VOLUMEUP,ts->input_dev->keybit);
+	set_bit(KEY_VOLUMEDOWN,ts->input_dev->keybit);
 	switch (ts->vk_type) {
 	case TYPE_PROPERTIES:
 		{
@@ -3634,5 +3767,6 @@ static void input_report_key_reduce(struct input_dev *dev,
 		}
 	} else {
 		input_report_key(dev, code, value);
+		
 	}
 }

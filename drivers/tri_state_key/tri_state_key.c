@@ -97,7 +97,7 @@ static void extcon_dev_work(struct work_struct *work)
 	if (hw_version == 13) {
 		key[0] = gpio_get_value(extcon_data->key1_gpio);
 		key[2] = gpio_get_value(extcon_data->key3_gpio);
-
+		pr_info("OSG ffftributton\n");
 		KEY_LOG("key[0]=%d,key[1]=%d,key[2]=%d\n",
 			 key[0], key[1], key[2]);
 		if (key[0] == 1 && key[2] == 1) {
@@ -117,6 +117,7 @@ static void extcon_dev_work(struct work_struct *work)
 		key[0] = gpio_get_value(extcon_data->key1_gpio);
 		key[1] = gpio_get_value(extcon_data->key2_gpio);
 		key[2] = gpio_get_value(extcon_data->key3_gpio);
+		pr_info("OSG tributton\n");
 		KEY_LOG("key[0]=%d,key[1]=%d,key[2]=%d\n",
 			key[0], key[1], key[2]);
 		/*op add to fix ISTRACKING-34823 begin*/
@@ -319,7 +320,7 @@ static int tristate_dev_probe(struct platform_device *pdev)
 		"tristate_key3", extcon_data);
 	if (ret < 0)
 		goto err_request_irq;
-
+	pr_info("OSG tributton INIT_WORK\n");
 	INIT_WORK(&extcon_data->work, extcon_dev_work);
 
 	init_timer(&extcon_data->s_timer);

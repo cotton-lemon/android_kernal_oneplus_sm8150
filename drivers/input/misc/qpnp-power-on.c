@@ -994,10 +994,14 @@ static int qpnp_pon_input_dispatch(struct qpnp_pon *pon, u32 pon_type)
 	 */
 	if (!cfg->old_state && !key_status) {
 		input_report_key(pon->pon_input, cfg->key_code, 1);
+		pr_info("OSG report power key OO %d\n",cfg->key_code);
 		input_sync(pon->pon_input);
 	}
 
 	input_report_key(pon->pon_input, cfg->key_code, key_status);
+	pr_info("OSG report power key OO1 %d\n",cfg->key_code);
+	pr_info("OSG power key %d %d %d",pon->pon_input,cfg->key_code,key_status);
+	pr_info("OSG power key %u %u %u",pon->pon_input,cfg->key_code,key_status);
 	input_sync(pon->pon_input);
 
 	cfg->old_state = !!key_status;
@@ -1136,6 +1140,7 @@ static void bark_work_func(struct work_struct *work)
 	if (!(pon_rt_sts & QPNP_PON_RESIN_BARK_N_SET)) {
 		/* Report the key event and enable the bark IRQ */
 		input_report_key(pon->pon_input, cfg->key_code, 0);
+		pr_info("report power key OO barkwork %d\n",cfg->key_code);
 		input_sync(pon->pon_input);
 		enable_irq(cfg->bark_irq);
 	} else {
@@ -1265,6 +1270,7 @@ static irqreturn_t qpnp_resin_bark_irq(int irq, void *_pon)
 
 	/* Report the key event */
 	input_report_key(pon->pon_input, cfg->key_code, 1);
+	pr_info("report power key oo bark %d\n",cfg->key_code);
 	input_sync(pon->pon_input);
 
 	/* Schedule work to check the bark status for key-release */

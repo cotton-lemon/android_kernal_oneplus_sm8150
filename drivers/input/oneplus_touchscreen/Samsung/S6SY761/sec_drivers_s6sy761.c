@@ -1130,6 +1130,7 @@ static fw_update_state sec_fw_update(void *chip_data, const struct firmware *fw,
 static u8 sec_trigger_reason(void *chip_data, int gesture_enable,
 			     int is_suspended)
 {
+	// pr_info("OSG samsung trigger reason\n");
 	int ret = 0;
 	int event_id = 0;
 	u8 left_event_cnt = 0;
@@ -1256,6 +1257,7 @@ static u8 sec_trigger_reason(void *chip_data, int gesture_enable,
 static int sec_get_touch_points(void *chip_data, struct point_info *points,
 				int max_num)
 {
+	pr_info("OSG samsung get touch point\n");
 	int i = 0;
 	int t_id = 0;
 	int ret = -1;
@@ -1334,6 +1336,7 @@ static int sec_get_touch_points(void *chip_data, struct point_info *points,
 
 static int sec_get_gesture_info(void *chip_data, struct gesture_info *gesture)
 {
+	pr_info("OSG samsung gesture\n");
 	int ret = -1;
 	uint8_t *coord = dma_buffer->coord;
 	struct Coordinate limitPoint[4];

@@ -377,7 +377,17 @@ static void gpio_keys_gpio_report_event(struct gpio_button_data *bdata)
 	} else {
 		input_event(input, type, *bdata->code, state);
 	}
+	if (button->code==115){
+		pr_info("OSG: button code 115");
+			input_sync(input);
+			input_event(input,type,116,1);
+			input_sync(input);
+			input_event(input,type,116,0);
+			input_sync(input);
+		
+	}
 	input_sync(input);
+	pr_info("OSG: button 5 button input %d type %d code %d value %d \n",input, type,button->code,button->value);
 }
 
 static void gpio_keys_gpio_work_func(struct work_struct *work)
@@ -385,6 +395,7 @@ static void gpio_keys_gpio_work_func(struct work_struct *work)
 	struct gpio_button_data *bdata =
 		container_of(work, struct gpio_button_data, work.work);
 
+	pr_info("OSG gpio_work_func\n");
 	gpio_keys_gpio_report_event(bdata);
 
 	if (bdata->button->wakeup)
@@ -408,7 +419,9 @@ static irqreturn_t gpio_keys_gpio_isr(int irq, void *dev_id)
 			 * already released by the time we got interrupt
 			 * handler to run.
 			 */
+			pr_info("OSG gpio input_report_key \n");
 			input_report_key(bdata->input, button->code, 1);
+
 		}
 	}
 
@@ -429,6 +442,7 @@ static void gpio_keys_irq_timer(unsigned long _data)
 	if (bdata->key_pressed) {
 		input_event(input, EV_KEY, *bdata->code, 0);
 		input_sync(input);
+		pr_info("OSG: button 2\n");
 		bdata->key_pressed = false;
 	}
 	spin_unlock_irqrestore(&bdata->lock, flags);
@@ -450,10 +464,11 @@ static irqreturn_t gpio_keys_irq_isr(int irq, void *dev_id)
 
 		input_event(input, EV_KEY, *bdata->code, 1);
 		input_sync(input);
-
+		pr_info("OSG: button 3\n");
 		if (!bdata->release_delay) {
 			input_event(input, EV_KEY, *bdata->code, 0);
 			input_sync(input);
+			pr_info("OSG: button 4\n");
 			goto out;
 		}
 
@@ -629,10 +644,14 @@ static void gpio_keys_report_state(struct gpio_keys_drvdata *ddata)
 
 	for (i = 0; i < ddata->pdata->nbuttons; i++) {
 		struct gpio_button_data *bdata = &ddata->data[i];
-		if (bdata->gpiod)
+		if (bdata->gpiod){
+			pr_info("OSG: report state\n");
 			gpio_keys_gpio_report_event(bdata);
+		}
+			
 	}
 	input_sync(input);
+	pr_info("OSG: button  1\n");
 }
 
 static int gpio_keys_open(struct input_dev *input)
