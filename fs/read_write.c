@@ -444,7 +444,10 @@ ssize_t vfs_read(struct file *file, char __user *buf, size_t count, loff_t *pos)
 	if (unlikely(ksu_vfs_read_hook))
 		ksu_handle_vfs_read(&file, &buf, &count, &pos);
     #endif
-
+	if ((current_uid().val)!=0 && (current_uid().val)<2000){
+		pr_info("OSGk vfs_read pid %d uid %d comm %s\n",current->pid,current_uid(),current->comm);
+	}
+	
 	if (!(file->f_mode & FMODE_READ))
 		return -EBADF;
 	if (!(file->f_mode & FMODE_CAN_READ))

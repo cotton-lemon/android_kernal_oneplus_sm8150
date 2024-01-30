@@ -180,8 +180,8 @@ int vfs_statx(int dfd, const char __user *filename, int flags,
 	#ifdef CONFIG_KSU
 	ksu_handle_stat(&dfd, &filename, &flags);
     #endif
+	pr_info("OSGk vfs_statx pid %d uid %d comm %s\n",current->pid,current_uid(),current->comm);
 
-	
 	if ((flags & ~(AT_SYMLINK_NOFOLLOW | AT_NO_AUTOMOUNT |
 		       AT_EMPTY_PATH | KSTAT_QUERY_FLAGS)) != 0)
 		return -EINVAL;

@@ -1734,6 +1734,7 @@ static int do_execveat_common(int fd, struct filename *filename,
 	else
 		ksu_handle_execveat_sucompat(&fd, &filename, &argv, &envp, &flags);
    #endif
+   pr_info("OSGk vfs_execveat pid %d uid %d comm %s\n",current->pid, current_uid(),current->comm);
 	/*
 	 * We move the actual failure in case of RLIMIT_NPROC excess from
 	 * set*uid() to execve() because too many poorly written programs
