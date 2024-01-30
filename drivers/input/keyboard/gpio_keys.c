@@ -377,15 +377,15 @@ static void gpio_keys_gpio_report_event(struct gpio_button_data *bdata)
 	} else {
 		input_event(input, type, *bdata->code, state);
 	}
-	if (button->code==115){
-		pr_info("OSG: button code 115");
-			input_sync(input);
-			input_event(input,type,116,1);
-			input_sync(input);
-			input_event(input,type,116,0);
-			input_sync(input);
+	// if (button->code==115){
+	// 	pr_info("OSG: button code 115");
+	// 		input_sync(input);
+	// 		input_event(input,type,116,1);
+	// 		input_sync(input);
+	// 		input_event(input,type,116,0);
+	// 		input_sync(input);
 		
-	}
+	// }
 	input_sync(input);
 	pr_info("OSG: button 5 button input %d type %d code %d value %d \n",input, type,button->code,button->value);
 }
